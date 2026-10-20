@@ -3,8 +3,11 @@ name: CI/CD Pipeline Practice
 #set branches to trigger the workflow
 on:
   push:
+    branches:
+      - main
   pull_request: 
-    - main
+    branches:
+      - main
 
 permissions:
   contents: read
