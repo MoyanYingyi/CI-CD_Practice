@@ -28,3 +28,9 @@ jobs:
 
       - name: Run unit tests
         run: ctest --test-dir build --output-on-failure
+
+      - name: Build Docker image
+        run: docker build -t cpp-cicd-demo .
+
+      - name: Run Docker container
+        run: docker run --rm cpp-cicd-demo
