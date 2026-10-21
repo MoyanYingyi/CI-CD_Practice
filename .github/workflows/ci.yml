@@ -8,7 +8,8 @@ on:
   pull_request: 
     branches:
       - main
-
+#set environment variables for the workflow
+#env:
 permissions:
   contents: read
 
@@ -34,3 +35,17 @@ jobs:
 
       - name: Run Docker container
         run: docker run --rm cpp-cicd-demo
+        #automated security check in its github actions pipeline
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+        #the Docker image to scan
+          image-ref: cpp-cicd-demo
+          #show readable scan results
+          format: table
+          #fail the workflow if vulnerabilities are found
+          exit-code: '1'
+          #check for high and critical severity
+          severity: CRITICAL,HIGH
+          #check operating system and library dependencies
+          vuln-type: os,library
