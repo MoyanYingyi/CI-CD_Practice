@@ -49,3 +49,33 @@ jobs:
           severity: CRITICAL,HIGH
           #check operating system and library dependencies
           vuln-type: os,library
+  
+  publish:
+    #wait until the build-and-test job is complete before running this job
+    needs: build-and-test
+    #publish only after push events to the main branch, not a pull request
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+        contents: read
+        #allow publish packages to GitHub Container Registry (GHCR)
+        packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        #autheticate securely to GitHub Container Registry (GHCR) using the GITHUB_TOKEN secret
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      #tag the image with the latest tag and the commit SHA, then push both tags to GHCR
+      - name: Build and publish Docker image
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker build -t "$IMAGE:latest" -t "$IMAGE:${GITHUB_SHA}" .
+          docker push "$IMAGE:latest"
+          docker push "$IMAGE:${GITHUB_SHA}"
